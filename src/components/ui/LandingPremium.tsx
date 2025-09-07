@@ -11,7 +11,7 @@ import Footer from "@/components/layout/Footer";
 import Pricing from "@/components/Pricing";
 import QuickTrack from "./QuickTrack";
 import { AnimatedText } from "./animate";
-import TypingHeadlineLoop, { TypingHeadline } from "./TypingHeadline";
+import TypingHeadlineLoop from "./TypingHeadline";
 
 /* ---------------- SAMPLE DATA (replace with fetch) ---------------- */
 
