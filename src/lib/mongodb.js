@@ -1,48 +1,29 @@
-// src/lib/mongodb.js
-import { MongoClient } from "mongodb";
+﻿// src/lib/mongodb.js
+import { MongoClient } from 'mongodb';
 
-const MONGODB_URI = process.env.MONGODB_URI;
-const MONGODB_DB = process.env.MONGODB_DB || "test";
+const MONGODB_URI = process.env.MONGODB_URI || '';
+const MONGODB_DB = process.env.MONGODB_DB || 'test';
 
 if (!MONGODB_URI) {
-  console.error("MONGODB_URI not set (src/lib/mongodb.js). Set it in .env.local");
+  throw new Error('Please define the MONGODB_URI environment variable in .env.local');
 }
 
-let cachedClient = global.__mongoClient;
-let cachedDb = global.__mongoDb;
+let cachedClient = null;
+let cachedDb = null;
 
-if (!cachedClient) {
-  const client = new MongoClient(MONGODB_URI || "", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+async function connectClient() {
+  if (cachedClient && cachedDb) {
+    return { client: cachedClient, db: cachedDb };
+  }
+
+  const client = new MongoClient(MONGODB_URI);
+  await client.connect();
   cachedClient = client;
-  global.__mongoClient = cachedClient;
+  cachedDb = client.db(MONGODB_DB);
+  return { client, db: cachedDb };
 }
 
 export async function getDb() {
-  if (!MONGODB_URI) {
-    const err = new Error("MONGODB_URI not configured");
-    err.code = "MISSING_URI";
-    throw err;
-  }
-
-  try {
-    // connect if not connected
-    if (!cachedClient.isConnected || typeof cachedClient.isConnected !== "function") {
-      // modern MongoClient may not have isConnected; attempt connect always but only once
-      await cachedClient.connect();
-    } else if (!cachedClient.isConnected()) {
-      await cachedClient.connect();
-    }
-
-    if (!global.__mongoDb) {
-      global.__mongoDb = cachedClient.db(MONGODB_DB);
-    }
-    return global.__mongoDb;
-  } catch (err) {
-    console.error("getDb() connection error:", err);
-    // rethrow so callers can handle specific responses
-    throw err;
-  }
+  const { db } = await connectClient();
+  return db;
 }

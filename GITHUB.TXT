@@ -1,0 +1,14 @@
+name: Scheduled price updater
+on:
+  schedule:
+    - cron: "*/10 * * * *" # every 10 minutes
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call update-prices API
+        env:
+          API_URL: https://your-site.com/api/update-prices
+          API_TOKEN: ${{ secrets.UPDATE_PRICES_TOKEN }}
+        run: |
+          curl -X POST "$API_URL" -H "Authorization: Bearer $API_TOKEN" -H "Content-Type: application/json" -d '{"batchSize":50}'

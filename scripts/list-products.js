@@ -1,21 +1,24 @@
-// scripts/test-mongo.js
+// scripts/list-products.js
 const { MongoClient } = require("mongodb");
 const uri = process.env.MONGODB_URI;
 const dbName = process.env.MONGODB_DB || "test";
 
-if (!uri) { console.error("MONGODB_URI missing"); process.exit(2); }
+if (!uri) {
+  console.error("Set MONGODB_URI in env");
+  process.exit(1);
+}
 
 (async () => {
   const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
   try {
     await client.connect();
-    console.log("Mongo connect OK");
     const db = client.db(dbName);
-    const collections = await db.listCollections().toArray();
-    console.log("DB:", dbName, "collections:", collections.map(c => c.name));
+    const docs = await db.collection("products").find({}).limit(50).toArray();
+    console.log("DB:", dbName, "count:", docs.length);
+    console.dir(docs, { depth: 3, colors: false });
     await client.close();
   } catch (err) {
-    console.error("Mongo connect failed:", err);
+    console.error("Error:", err);
     process.exit(1);
   }
 })();

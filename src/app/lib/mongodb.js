@@ -1,19 +1,41 @@
+// src/lib/mongodb.js
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGODB_URI;
-if (!uri) throw new Error("Add MONGODB_URI in .env.local");
+const MONGODB_URI = process.env.MONGODB_URI || "";
+const MONGODB_DB = process.env.MONGODB_DB || "test";
 
-let client;
-let clientPromise;
-
-if (!global._mongoClientPromise) {
-  client = new MongoClient(uri);
-  global._mongoClientPromise = client.connect();
+if (!MONGODB_URI) {
+  throw new Error("Please define the MONGODB_URI environment variable in .env.local");
 }
 
-clientPromise = global._mongoClientPromise;
+let cachedClient = null;
+let cachedDb = null;
 
+/**
+ * Connect and cache client/db to avoid multiple connections during HMR.
+ */
+async function connectClient() {
+  if (cachedClient && cachedDb) {
+    return { client: cachedClient, db: cachedDb };
+  }
+
+  const client = new MongoClient(MONGODB_URI, {
+    // options left default for modern driver
+  });
+
+  // always attempt to connect once
+  await client.connect();
+
+  cachedClient = client;
+  cachedDb = client.db(MONGODB_DB);
+
+  return { client, db: cachedDb };
+}
+
+/**
+ * Public helper: returns a connected Db instance or throws.
+ */
 export async function getDb() {
-  const client = await clientPromise;
-  return client.db();
+  const { db } = await connectClient();
+  return db;
 }
