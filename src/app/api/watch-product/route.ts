@@ -27,6 +27,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, watching: true, productId, created }, { status: 200 });
   } catch (err) {
     console.error("watch-product error:", err);
-    return NextResponse.json({ ok: false, error: "internal", detail: String(err?.message || err) }, { status: 500 });
+
+    // Narrow `err` safely (TypeScript: unknown in catch)
+    const detail = err instanceof Error ? err.message : String(err ?? "unknown error");
+
+    return NextResponse.json(
+      { ok: false, error: "internal", detail },
+      { status: 500 }
+    );
   }
 }
