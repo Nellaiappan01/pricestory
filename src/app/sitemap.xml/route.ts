@@ -35,7 +35,10 @@ ${all
 
     return new Response(xml, { status: 200, headers: { "Content-Type": "application/xml" } });
   } catch (err) {
-    console.error("Sitemap generation error:", err && (err.stack || err.message || err));
+    // Narrow `err` safely (TypeScript: catch variable is `unknown` under strict settings)
+    const errInfo = err instanceof Error ? (err.stack || err.message) : String(err ?? "unknown error");
+    console.error("Sitemap generation error:", errInfo);
+
     const xmlFallback = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${staticUrls
