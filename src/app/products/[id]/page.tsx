@@ -12,7 +12,9 @@ export default async function ProductPage({ params }: Params) {
     const db = await getDb();
     product = await db.collection("products").findOne({ _id: new ObjectId(id) });
   } catch (err) {
-    console.error("DB fetch error", err && (err.stack || err.message || err));
+    // Narrow `err` safely: TypeScript treats catch variable as `unknown`
+    const errInfo = err instanceof Error ? (err.stack || err.message) : String(err ?? "unknown error");
+    console.error("DB fetch error", errInfo);
   }
 
   if (!product) {
