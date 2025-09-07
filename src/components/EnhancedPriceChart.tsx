@@ -68,8 +68,16 @@ export default function EnhancedPriceChart({
       return { idx, raw: h, x: atMs, y: priceNum };
     });
 
-    const valids = mapped.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
-    const dropped = mapped.filter((p) => !(Number.isFinite(p.x) && Number.isFinite(p.y)));
+    // --- NEW: typed Point + type guard so TypeScript knows x/y are numbers ---
+    type Mapped = { idx: number; raw: PricePoint; x: number | null; y: number | null };
+    type Point = { idx: number; raw: PricePoint; x: number; y: number };
+
+    const isFinitePoint = (p: Mapped): p is Point =>
+      typeof p.x === "number" && Number.isFinite(p.x) && typeof p.y === "number" && Number.isFinite(p.y);
+
+    const valids: Point[] = mapped.filter(isFinitePoint);
+    const dropped = mapped.filter((p) => !isFinitePoint(p));
+    // -----------------------------------------------------------------------
 
     valids.sort((a, b) => a.x - b.x);
 
