@@ -1,12 +1,13 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
-const sentence = "Monitor price history across Flipkart & Amazon, get instant alerts, and never miss a deal again — all in a premium mobile-friendly experience.";
+const sentence =
+  "Monitor price history across Flipkart & Amazon, get instant alerts, and never miss a deal again — all in a premium mobile-friendly experience.";
 
 export function AnimatedText() {
-  // Wrapper for whole sentence
-  const container = {
+  // Wrapper for whole sentence (typed)
+  const container: Variants = {
     hidden: { opacity: 1 },
     visible: {
       opacity: 1,
@@ -16,9 +17,9 @@ export function AnimatedText() {
     },
   };
 
-  // Animation for each letter
-  const child = {
-    hidden: { opacity: 0, y: `0.25em`, color: "#64748b" }, // slate-600
+  // Animation for each letter (typed)
+  const child: Variants = {
+    hidden: { opacity: 0, y: 6, color: "#64748b" }, // fallback slate-600
     visible: {
       opacity: 1,
       y: 0,
@@ -30,8 +31,10 @@ export function AnimatedText() {
       ],
       transition: {
         duration: 0.8,
-        ease: "easeInOut",
-        color: { duration: 1.2, ease: "easeInOut" },
+        // numeric cubic-bezier easing accepted by Framer Motion types
+        ease: [0.2, 0.8, 0.2, 1],
+        // per-property override for color (also typed)
+        color: { duration: 1.2, ease: [0.2, 0.8, 0.2, 1] },
       },
     },
   };
