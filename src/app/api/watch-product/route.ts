@@ -1,27 +1,49 @@
-// src/app/api/watch-product/route.js
-import { getDb } from "../../../lib/mongodb";
+// src/app/api/watch-product/route.ts
+import { NextResponse } from "next/server";
+import { getDb } from "@/lib/mongodb";
 
-export async function POST(req) {
+export async function POST(req: Request) {
   try {
-    const { url, productId } = await req.json();
-    const db = await getDb();
-    const products = db.collection("products");
+    const body = await req.json();
+    const productId = body?.productId;
 
-    if (productId) {
-      await products.updateOne({ _id: typeof productId === "string" ? { $eq: productId } : productId }, { $set: { watching: true } });
-      return new Response(JSON.stringify({ ok: true }), { status: 200 });
+    if (!productId) {
+      return NextResponse.json(
+        { ok: false, error: "productId required" },
+        { status: 400 }
+      );
     }
 
-    if (url) {
-      const p = await products.findOne({ url });
-      if (!p) return new Response(JSON.stringify({ error: "product not found" }), { status: 404 });
-      await products.updateOne({ _id: p._id }, { $set: { watching: true } });
-      return new Response(JSON.stringify({ ok: true }), { status: 200 });
+    let db;
+    try {
+      db = await getDb();
+    } catch (dbErr) {
+      console.error("watch-product DB connect error:", dbErr);
+      return NextResponse.json(
+        { ok: false, error: "db_unavailable" },
+        { status: 200 }
+      );
     }
 
-    return new Response(JSON.stringify({ error: "productId or url required" }), { status: 400 });
-  } catch (err) {
-    console.error("watch-product error:", err && (err.stack || err.message || err));
-    return new Response(JSON.stringify({ error: "internal", detail: String(err && err.message) }), { status: 500 });
+    // Upsert watch record
+    const result = await db.collection("watchlist").updateOne(
+      { productId },
+      { $setOnInsert: { productId, watchedAt: new Date() } },
+      { upsert: true }
+    );
+
+    const created = !!result.upsertedId;
+
+    return NextResponse.json({
+      ok: true,
+      watching: true,
+      created, // true if new, false if already existed
+    });
+  } catch (err: any) {
+    console.error("watch-product error:", err);
+    return NextResponse.json(
+      { ok: false, error: "server_error", detail: String(err?.message || err) },
+      { status: 500 }
+    );
   }
 }

@@ -226,16 +226,7 @@ export default function LandingPremium() {
           </Card>
         </div>
       </section>
-      {/* FEATURES */}
-      <section className="max-w-6xl mx-auto px-4 py-10">
-        <h3 className="text-xl font-semibold">Why PriceTracker</h3>
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <FeatureCard title="Accurate History" desc="See min / max / avg prices across time with CSV export." />
-          <FeatureCard title="Instant Alerts" desc="Email & SMS alerts when your watched price hits the target." />
-          <FeatureCard title="Mobile-first UI" desc="Fast, pocket-friendly experience with premium animations." />
-          <FeatureCard title="Affiliate Friendly" desc="Direct buy links or affiliate redirects supported." />
-        </div>
-      </section>
+      
 
       {/* POPULAR PRODUCTS */}
       <section className="max-w-6xl mx-auto px-4 py-10">
@@ -264,9 +255,15 @@ export default function LandingPremium() {
               </div>
 
               <div className="mt-3 flex gap-2">
-                <a href={p.url} target="_blank" rel="noopener noreferrer nofollow" className="text-xs font-medium">
-                  Buy
-                </a>
+                <a
+  href={`/api/redirect/${p._id}`}
+  target="_blank"
+  rel="noopener noreferrer nofollow"
+  className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
+>
+  Buy Now
+</a>
+
                 <button
                   onClick={() => watchProduct(p.id)}
                   className="ml-auto text-xs px-2 py-1 rounded-md border"
@@ -279,7 +276,16 @@ export default function LandingPremium() {
           ))}
         </div>
       </section>
-
+          {/* FEATURES */}
+      <section className="max-w-6xl mx-auto px-4 py-10">
+        <h3 className="text-xl font-semibold">Why PriceTracker</h3>
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <FeatureCard title="Accurate History" desc="See min / max / avg prices across time with CSV export." />
+          <FeatureCard title="Instant Alerts" desc="Email & SMS alerts when your watched price hits the target." />
+          <FeatureCard title="Mobile-first UI" desc="Fast, pocket-friendly experience with premium animations." />
+          <FeatureCard title="Affiliate Friendly" desc="Direct buy links or affiliate redirects supported." />
+        </div>
+      </section>
       <Pricing />
       <Footer />
     </main>

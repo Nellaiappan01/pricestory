@@ -1,19 +1,32 @@
 // src/app/api/add-product/route.js
-import { getDb } from "../../../lib/mongodb";
+import { NextResponse } from "next/server";
+import { getDb } from "@/lib/mongodb";
 
 export async function POST(req) {
+  console.log("📩 [add-product] request received");
   try {
     const body = await req.json();
     const { url, title } = body;
-    if (!url) return new Response(JSON.stringify({ error: "url required" }), { status: 400 });
+
+    console.log("➡️ body:", body);
+
+    if (!url) {
+      return NextResponse.json({ error: "url required" }, { status: 400 });
+    }
 
     const db = await getDb();
+    console.log("✅ got DB:", db.databaseName);
+
     const products = db.collection("products");
 
-    // avoid exact-URL duplicates
+    // check duplicates
     const existing = await products.findOne({ url });
     if (existing) {
-      return new Response(JSON.stringify({ ok: true, id: existing._id.toString() }), { status: 200 });
+      console.log("♻️ existing product found:", existing._id.toString());
+      return NextResponse.json(
+        { ok: true, id: existing._id.toString(), fromCache: true },
+        { status: 200 }
+      );
     }
 
     const doc = {
@@ -26,9 +39,17 @@ export async function POST(req) {
     };
 
     const r = await products.insertOne(doc);
-    return new Response(JSON.stringify({ ok: true, id: r.insertedId.toString() }), { status: 201 });
+    console.log("✅ inserted new product:", r.insertedId.toString());
+
+    return NextResponse.json(
+      { ok: true, id: r.insertedId.toString() },
+      { status: 201 }
+    );
   } catch (err) {
-    console.error("add-product error:", err && (err.stack || err.message || err));
-    return new Response(JSON.stringify({ error: "internal", detail: String(err && err.message) }), { status: 500 });
+    console.error("🔥 add-product error:", err);
+    return NextResponse.json(
+      { error: "internal", detail: String(err?.message || err) },
+      { status: 500 }
+    );
   }
 }
