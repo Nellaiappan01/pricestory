@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { HiOutlineShoppingCart, HiOutlineBell, HiOutlineShare,HiCheck,HiBell  } from "react-icons/hi";
+import { motion, AnimatePresence, Variants } from "framer-motion";
+import { HiOutlineShoppingCart, HiOutlineBell, HiOutlineShare, HiCheck, HiBell } from "react-icons/hi";
 import { FiClock } from "react-icons/fi";
 
 export type PreviewProductType = {
@@ -107,9 +107,14 @@ export default function PreviewProductMassive({ product }: { product: PreviewPro
   const trackedDays = daysSince(trackedSinceIso);
 
   // card variants for smooth hover
-  const cardVariants = {
+  const cardVariants: Variants = {
     initial: { opacity: 0, y: 8, scale: 1 },
-    enter: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.28, ease: "easeOut" } },
+    enter: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { duration: 0.28, ease: [0.2, 0.8, 0.2, 1] },
+    },
     hover: {
       y: -8,
       scale: 1.01,
@@ -118,12 +123,12 @@ export default function PreviewProductMassive({ product }: { product: PreviewPro
     },
   };
 
-  const imageVariants = {
+  const imageVariants: Variants = {
     hidden: { opacity: 0, scale: 0.98 },
     show: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 140, damping: 22 } },
   };
 
-  const infoVariants = {
+  const infoVariants: Variants = {
     hidden: { opacity: 0, y: 8 },
     show: { opacity: 1, y: 0, transition: { duration: 0.36 } },
   };
@@ -273,7 +278,7 @@ export default function PreviewProductMassive({ product }: { product: PreviewPro
                 initial={{ opacity: 0, y: -6, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 whileHover={{ scale: 1.03 }}
-                transition={{ duration: 0.28 }}
+                transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
                 className={`absolute top-3 left-3 z-20 px-2 py-0.5 rounded-full text-[11px] font-semibold border ${badgeInfo.badgeClasses} ${badgeInfo.textClasses || "text-slate-800"} shadow-sm`}
                 aria-hidden
               >
@@ -300,7 +305,7 @@ export default function PreviewProductMassive({ product }: { product: PreviewPro
                   initial={{ scale: 0.8, opacity: 0.28 }}
                   animate={{ scale: 1.6, opacity: 0 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.9, ease: "easeOut" }}
+                  transition={{ duration: 0.9, ease: [0.2, 0.8, 0.2, 1] }}
                   className="absolute inset-0 rounded-2xl bg-indigo-100/30 pointer-events-none"
                 />
               )}
