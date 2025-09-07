@@ -10,8 +10,11 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Pricing from "@/components/Pricing";
 import QuickTrack from "./QuickTrack";
+import { AnimatedText } from "./animate";
+import TypingHeadlineLoop, { TypingHeadline } from "./TypingHeadline";
 
 /* ---------------- SAMPLE DATA (replace with fetch) ---------------- */
+
 const sampleProducts = [
   {
     id: "1",
@@ -134,19 +137,23 @@ export default function LandingPremium() {
       <section className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-12">
         <div>
           <MotionFade delay={0.02}>
-            <h2 className="text-3xl sm:text-4xl font-extrabold leading-tight">Track prices. Save money. Buy smarter.</h2>
+            <MotionFade delay={0.02}><TypingHeadlineLoop className="text-2xl sm:text-3xl font-extrabold" />
+
+
+</MotionFade>
+            
           </MotionFade>
 
           <MotionFade delay={0.1}>
             <p className="mt-4 text-slate-600">
-              Monitor price history across Flipkart & Amazon, get instant alerts, and never miss a deal again — all in a
-              premium mobile-friendly experience.
-            </p>
+              <AnimatedText />
+</p>
+
+
           </MotionFade>
             
                     <QuickTrack />
 
-        
 
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat label="Products tracked" value="1,024" />
@@ -256,13 +263,13 @@ export default function LandingPremium() {
 
               <div className="mt-3 flex gap-2">
                 <a
-  href={`/api/redirect/${p._id}`}
-  target="_blank"
-  rel="noopener noreferrer nofollow"
-  className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
->
-  Buy Now
-</a>
+                  href={`/api/redirect/${(p as any)._id ?? p.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
+                >
+                  Buy Now
+                </a>
 
                 <button
                   onClick={() => watchProduct(p.id)}
