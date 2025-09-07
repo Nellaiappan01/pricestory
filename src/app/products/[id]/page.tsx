@@ -34,6 +34,22 @@ export default async function ProductPage({ params }: Params) {
   const currentPrice = product.currentPrice ?? (history.length ? history[history.length - 1].price : null);
   const lowest = history.length ? Math.min(...history.map((h: any) => h.price)) : null;
 
+  // --- NEW: compute prices / svg points with explicit types to avoid implicit any ---
+  const prices: number[] = history.map((h: any) => Number(h.price ?? 0));
+  const points: string = history.length
+    ? history
+        .map((h: any, i: number) => {
+          const x = (i / (history.length - 1)) * 200;
+          const min = Math.min(...prices);
+          const max = Math.max(...prices);
+          const range = max - min || 1;
+          const y = 60 - ((Number(h.price ?? 0) - min) / range) * 50;
+          return `${x},${y}`;
+        })
+        .join(" ")
+    : "0,50 50,45 100,48 150,35 200,30";
+  // -------------------------------------------------------------------------------
+
   return (
     <main className="p-8 max-w-4xl mx-auto">
       <header className="mb-6">
@@ -57,15 +73,7 @@ export default async function ProductPage({ params }: Params) {
             <div className="mt-6">
               {/* lightweight inline sparkline - simple SVG */}
               <svg viewBox="0 0 200 60" className="w-full h-28">
-                <polyline fill="none" stroke="#6366F1" strokeWidth="3"
-                  points={history.length ? history.map((h,i)=>{
-                    const x = (i/(history.length-1))*200;
-                    const prices = history.map(x=>x.price);
-                    const min = Math.min(...prices), max = Math.max(...prices);
-                    const range = max - min || 1;
-                    const y = 60 - ((h.price - min)/range)*50;
-                    return `${x},${y}`;
-                  }).join(" ") : "0,50 50,45 100,48 150,35 200,30"} />
+                <polyline fill="none" stroke="#6366F1" strokeWidth="3" points={points} />
               </svg>
             </div>
 
