@@ -2,7 +2,7 @@
 import { getDb } from "../../lib/mongodb";
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pricestory.vercel.app/";
 
   const staticUrls = [
     { url: `${baseUrl}/`, lastMod: new Date().toISOString() },
