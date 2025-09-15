@@ -1,4 +1,3 @@
-// src/app/sitemap.xml/route.ts
 import { getDb } from "../../lib/mongodb";
 
 export async function GET() {
@@ -12,7 +11,13 @@ export async function GET() {
 
   try {
     const db = await getDb();
+
+    console.log("[SITEMAP] Connected to MongoDB");
+
     const products = await db.collection("products").find({}, { projection: { _id: 1, lastChecked: 1 } }).toArray();
+
+    console.log(`[SITEMAP] Number of products fetched: ${products.length}`);
+    console.log("[SITEMAP] Product IDs:", products.map((p: any) => p._id.toString()));
 
     const productUrls = (products || []).map((p: any) => ({
       url: `${baseUrl}/products/${p._id}`,
@@ -33,11 +38,12 @@ ${all
   .join("\n")}
 </urlset>`;
 
+    console.log("[SITEMAP] Sitemap generated successfully.");
+
     return new Response(xml, { status: 200, headers: { "Content-Type": "application/xml" } });
   } catch (err) {
-    // Narrow `err` safely (TypeScript: catch variable is `unknown` under strict settings)
     const errInfo = err instanceof Error ? (err.stack || err.message) : String(err ?? "unknown error");
-    console.error("Sitemap generation error:", errInfo);
+    console.error("[SITEMAP] Generation error:", errInfo);
 
     const xmlFallback = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -50,6 +56,7 @@ ${staticUrls
   )
   .join("\n")}
 </urlset>`;
+
     return new Response(xmlFallback, { status: 200, headers: { "Content-Type": "application/xml" } });
   }
-}
+};
