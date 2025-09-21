@@ -4,8 +4,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 dotenv.config();
 
-import { getDb } from "../src/lib/mongodb.js";
-import fetch from "node-fetch";
+import { getDb } from "../src/lib/mongodb.js"; // must exist
 import { chromium } from "playwright";
 
 const argv = process.argv.slice(2);
@@ -17,7 +16,6 @@ function extractFlipkartItemId(urlOrText) {
   if (!urlOrText) return null;
   const m = String(urlOrText).match(/(itm[a-zA-Z0-9]+)/i);
   if (m) return m[1];
-  // fallback: pid param
   const m2 = String(urlOrText).match(/[?&]pid=([A-Z0-9]+)/i);
   if (m2) return m2[1];
   return null;
@@ -34,19 +32,16 @@ async function tryFlipkartApi(itemId) {
     if (!r.ok) {
       return { ok: false, status: r.status };
     }
-    const json = await r.json();
-    // common paths in Flipkart affiliate response
-    const maybe = json.productBaseInfoV1 || json.product_base_info_v1 || json.product || json;
+    const json = await r.json().catch(()=>null);
+    const maybe = json?.productBaseInfoV1 || json?.product_base_info_v1 || json?.product || json;
     const title = maybe?.title || maybe?.productTitle || maybe?.name || null;
     let image = null;
     if (maybe) {
-      try {
-        if (maybe.imageUrls && typeof maybe.imageUrls === "object") {
-          const vals = Object.values(maybe.imageUrls);
-          if (vals.length) image = Array.isArray(vals[0]) ? vals[0][0] : vals[0];
-        }
-        image = image || maybe?.imageUrl || maybe?.image || null;
-      } catch {}
+      if (maybe.imageUrls && typeof maybe.imageUrls === "object") {
+        const vals = Object.values(maybe.imageUrls);
+        if (vals.length) image = Array.isArray(vals[0]) ? vals[0][0] : vals[0];
+      }
+      image = image || maybe?.imageUrl || maybe?.image || null;
     }
     return { title: title || null, image: image || null, source: "flipkart-api" };
   } catch (err) {

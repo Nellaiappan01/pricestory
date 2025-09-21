@@ -1,47 +1,18 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip } from "recharts";
 
+import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Pricing from "@/components/Pricing";
-import QuickTrack from "./QuickTrack";
+import QuickTrack from "../QuickTrack";
 import { AnimatedText } from "./animate";
-import TypingHeadlineLoop from "./TypingHeadline";
 
-/* ---------------- SAMPLE DATA (replace with fetch) ---------------- */
-
-const sampleProducts = [
-  {
-    id: "1",
-    title: "Noise-Cancelling Headphones — Black",
-    price: 3499,
-    url: "https://www.flipkart.com/item/1",
-    priceHistory: [
-      { t: "Day 1", p: 3999 },
-      { t: "Day 2", p: 3899 },
-      { t: "Day 3", p: 3799 },
-      { t: "Day 4", p: 3599 },
-      { t: "Day 5", p: 3499 },
-    ],
-  },
-  {
-    id: "2",
-    title: "Smart Fitness Band — Pro",
-    price: 1299,
-    url: "https://www.flipkart.com/item/2",
-    priceHistory: [
-      { t: "D1", p: 1499 },
-      { t: "D2", p: 1399 },
-      { t: "D3", p: 1349 },
-      { t: "D4", p: 1299 },
-    ],
-  },
-];
+import { sampleProducts } from "../sampleData";
+import PopularProducts from "../PopularProducts";
 
 /* ----------------- Inline small helpers ----------------- */
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -137,23 +108,18 @@ export default function LandingPremium() {
       <section className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-12">
         <div>
           <MotionFade delay={0.02}>
-            <MotionFade delay={0.02}><TypingHeadlineLoop className="text-2xl sm:text-3xl font-extrabold" />
-
-
-</MotionFade>
-            
+            <MotionFade delay={0.02}>
+              <h1 className="text-2xl sm:text-3xl font-extrabold">Heading</h1>
+            </MotionFade>
           </MotionFade>
 
           <MotionFade delay={0.1}>
             <p className="mt-4 text-slate-600">
               <AnimatedText />
-</p>
-
-
+            </p>
           </MotionFade>
-            
-                    <QuickTrack />
 
+          <QuickTrack />
 
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat label="Products tracked" value="1,024" />
@@ -163,127 +129,12 @@ export default function LandingPremium() {
           </div>
         </div>
 
-        <div>
-          <Card className="shadow-2xl">
-            <CardContent>
-              <div className="flex items-start gap-4">
-                <div className="flex-1">
-                  <h3 className="font-semibold">Featured: {sampleProducts[0].title}</h3>
-                  <p className="text-slate-500 text-sm">Current: ₹{sampleProducts[0].price}</p>
-
-                  <div className="mt-2 flex gap-2">
-                    {["Bad", "Good", "Very Good"].map((r) => {
-                      const isSelected = selectedRating[sampleProducts[0].id] === r;
-                      const base =
-                        r === "Bad"
-                          ? "bg-red-50 text-red-700"
-                          : r === "Good"
-                          ? "bg-amber-50 text-amber-700"
-                          : "bg-emerald-50 text-emerald-700";
-                      return (
-                        <button
-                          key={r}
-                          onClick={() => {
-                            setSelectedRating((s) => ({ ...s, [sampleProducts[0].id]: r }));
-                            sendFeedback(sampleProducts[0].id, r);
-                          }}
-                          className={`px-2 py-0.5 rounded-full text-xs border transition ${isSelected ? "bg-indigo-600 text-white" : base}`}
-                          aria-pressed={isSelected}
-                        >
-                          {r}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="mt-3 h-32">
-                    <ResponsiveContainer width="100%" height={120}>
-                      <LineChart data={sampleProducts[0].priceHistory}>
-                        <Tooltip />
-                        <Line type="monotone" dataKey="p" strokeWidth={2} stroke="#6d28d9" dot={false} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  <div className="mt-4 flex items-center gap-2">
-                    <a
-                      href={sampleProducts[0].url}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                      className="text-sm font-medium inline-flex items-center gap-2 hover:underline"
-                    >
-                      Buy now
-                    </a>
-
-                    <button
-                      onClick={() => watchProduct(sampleProducts[0].id)}
-                      className="ml-auto text-sm px-3 py-1 rounded-md bg-indigo-50 hover:bg-indigo-100 transition"
-                      aria-label="Watch price"
-                    >
-                      Watch price
-                    </button>
-                  </div>
-                </div>
-
-                <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-white rounded-xl flex items-center justify-center text-slate-400 border">
-                  <div className="text-xs">Image</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </section>
-      
 
       {/* POPULAR PRODUCTS */}
-      <section className="max-w-6xl mx-auto px-4 py-10">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Popular tracked products</h3>
-          <Link href="/products" className="text-sm text-slate-600 hover:underline">
-            View all
-          </Link>
-        </div>
+      <PopularProducts onWatch={watchProduct} />
 
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sampleProducts.map((p) => (
-            <motion.div key={p.id} whileHover={{ translateY: -6 }} className="p-4 bg-white rounded-2xl shadow">
-              <div className="flex items-center gap-3">
-                <div className="flex-1">
-                  <h4 className="font-medium text-sm truncate">{p.title}</h4>
-                  <p className="text-xs text-slate-500">₹{p.price}</p>
-                </div>
-                <div className="w-20 h-12">
-                  <ResponsiveContainer width="100%" height={50}>
-                    <LineChart data={p.priceHistory}>
-                      <Line type="monotone" dataKey="p" strokeWidth={2} stroke="#06b6d4" dot={false} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="mt-3 flex gap-2">
-                <a
-                  href={`/api/redirect/${(p as any)._id ?? p.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
-                >
-                  Buy Now
-                </a>
-
-                <button
-                  onClick={() => watchProduct(p.id)}
-                  className="ml-auto text-xs px-2 py-1 rounded-md border"
-                  aria-label={`Watch ${p.title}`}
-                >
-                  Watch
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-          {/* FEATURES */}
+      {/* FEATURES */}
       <section className="max-w-6xl mx-auto px-4 py-10">
         <h3 className="text-xl font-semibold">Why PriceTracker</h3>
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -293,6 +144,7 @@ export default function LandingPremium() {
           <FeatureCard title="Affiliate Friendly" desc="Direct buy links or affiliate redirects supported." />
         </div>
       </section>
+
       <Pricing />
       <Footer />
     </main>

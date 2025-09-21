@@ -1,5 +1,5 @@
 ﻿import './globals.css'
-export const metadata = { title: 'PriceTracker.store' }
+export const metadata = { title: 'PriceStory.store' }
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en'>

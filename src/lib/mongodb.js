@@ -1,29 +1,26 @@
-﻿// src/lib/mongodb.js
-import { MongoClient } from 'mongodb';
+﻿import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
+dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI || '';
-const MONGODB_DB = process.env.MONGODB_DB || 'test';
+import { MongoClient } from "mongodb";
 
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable in .env.local');
+const uri = process.env.MONGODB_URI;
+
+if (!uri) {
+  throw new Error("Please define the MONGODB_URI environment variable in .env.local");
 }
 
-let cachedClient = null;
-let cachedDb = null;
+let client;
+let clientPromise;
 
-async function connectClient() {
-  if (cachedClient && cachedDb) {
-    return { client: cachedClient, db: cachedDb };
-  }
-
-  const client = new MongoClient(MONGODB_URI);
-  await client.connect();
-  cachedClient = client;
-  cachedDb = client.db(MONGODB_DB);
-  return { client, db: cachedDb };
+if (!global._mongoClientPromise) {
+  client = new MongoClient(uri);
+  global._mongoClientPromise = client.connect();
 }
+
+clientPromise = global._mongoClientPromise;
 
 export async function getDb() {
-  const { db } = await connectClient();
-  return db;
+  const c = await clientPromise;
+  return c.db(process.env.MONGO_DBNAME || "test");
 }
