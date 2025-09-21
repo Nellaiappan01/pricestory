@@ -1,7 +1,12 @@
-import Hero from "@/components/Hero";
-import Features from "@/components/Features";
-import Testimonials from "@/components/Testimonials";
-import PricingCTA from "@/components/PricingCTA";
-import LandingPremium from "@/components/ui/LandingPremium";
+// src/app/page.tsx
+import Hero from "@/components/landing/Hero";
+import LandingPremium from "@/components/landing/LandingPremium";
 
-export default function Page(){ return (<main><LandingPremium /></main>) }
+export default function Page() {
+  return (
+    <>
+      <Hero />
+      <LandingPremium />
+    </>
+  );
+}

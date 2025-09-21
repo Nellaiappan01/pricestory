@@ -1,33 +1,41 @@
 "use client";
 import Link from "next/link";
-import React from "react";
-import { ArrowRight } from "lucide-react";
-import { Button } from "../ui/ButtonShim"; // small shim (see ButtonShim file path below)
+import { signIn, signOut, useSession } from "next-auth/react";
 
 export default function Header() {
-  return (
-    <nav className="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-500 flex items-center justify-center text-white font-bold">
-          PT
-        </div>
-        <div className="hidden sm:block">
-          <h1 className="text-lg font-semibold">PriceTracker</h1>
-          <p className="text-xs text-slate-500">Smart price alerts & history</p>
-        </div>
-      </div>
+  const { data: session } = useSession();
 
-      <div className="flex items-center gap-3">
-        <Link href="/login" className="text-sm hidden sm:inline">
-          Login
+  return (
+    <header className="w-full bg-white border-b">
+      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-indigo-500 text-white grid place-items-center font-bold">PT</div>
+          <div>
+            <div className="font-bold">PriceTracker</div>
+            <div className="text-xs text-slate-500">Smart price alerts & history</div>
+          </div>
         </Link>
-        <Button className="hidden sm:inline-flex">
-          Get started <ArrowRight size={14} />
-        </Button>
-        <button aria-label="menu" className="sm:hidden p-2 rounded-md bg-white/60 shadow">
-          ☰
-        </button>
+
+        <div className="flex items-center gap-4">
+          {!session ? (
+            <>
+              <button onClick={() => signIn("google", { callbackUrl: "/" })} className="text-sm text-slate-700">
+                Login
+              </button>
+              <button onClick={() => signIn("google", { callbackUrl: "/" })} className="px-4 py-2 rounded-full bg-indigo-600 text-white text-sm">
+                Get started
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="text-sm text-slate-700">Hi, {session.user?.name || session.user?.email}</span>
+              <button onClick={() => signOut({ callbackUrl: "/" })} className="px-4 py-2 rounded-full border">
+                Sign out
+              </button>
+            </>
+          )}
+        </div>
       </div>
-    </nav>
+    </header>
   );
 }
