@@ -1,10 +1,16 @@
 // src/app/robots.txt/route.ts
-export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const content = `User-agent: *
-Allow: /
+import { NextResponse } from "next/server";
 
-Sitemap: ${baseUrl}/sitemap.xml
+export async function GET() {
+  const SITE = process.env.SITE_BASE_URL?.replace(/\/$/, "") || "http://localhost:3000";
+
+  const txt = `User-agent: *
+Disallow:
+
+Sitemap: ${SITE}/sitemap.xml
 `;
-  return new Response(content, { status: 200, headers: { "Content-Type": "text/plain" } });
+
+  return new NextResponse(txt, {
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=3600" },
+  });
 }

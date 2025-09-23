@@ -1,46 +1,46 @@
+// src/app/api/signup/route.ts
 import { NextResponse } from "next/server";
-import { getDb } from "@/lib/mongodb";
-import bcrypt from "bcryptjs";
+import { getDb } from "@/lib/mongodb"; // or your db helper
+
+export const dynamic = "force-dynamic"; // optional, ensures runtime handling
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { email, password } = body;
-
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password required" },
-        { status: 400 }
-      );
+    const body = await req.json().catch(() => ({}));
+    const emailRaw = body?.email;
+    if (!emailRaw) {
+      return NextResponse.json({ ok: false, error: "email required" }, { status: 400 });
     }
 
+    const email = String(emailRaw).toLowerCase();
+    const name = body?.name ?? null;
+    const password = body?.password ?? null; // if you accept password here
+    // other fields...
+
+    // connect to DB
     const db = await getDb();
+    const now = new Date();
 
-    // Check if user already exists
-    const existing = await db.collection("users").findOne({ email });
-    if (existing) {
-      return NextResponse.json(
-        { error: "User already exists" },
-        { status: 409 }
-      );
-    }
-
-    // Hash password
-    const hashed = await bcrypt.hash(password, 10);
-
-    // Insert user
-    await db.collection("users").insertOne({
-      email,
-      password: hashed,
-      createdAt: new Date(),
-    });
-
-    return NextResponse.json({ ok: true }, { status: 201 });
-  } catch (err: any) {
-    console.error("Signup error:", err);
-    return NextResponse.json(
-      { error: "Internal Server Error", details: err.message },
-      { status: 500 }
+    // Upsert example: create user or update lastSeen
+    await db.collection("users").updateOne(
+      { email },
+      {
+        $set: {
+          email,
+          name,
+          lastSeen: now,
+        },
+        $setOnInsert: {
+          createdAt: now,
+          // store password hashed here if you handle auth creation
+        },
+      },
+      { upsert: true }
     );
+
+    return NextResponse.json({ ok: true, message: "signup received", userId: email });
+  } catch (err) {
+    console.error("signup POST error", err);
+    return NextResponse.json({ ok: false, error: "server error" }, { status: 500 });
   }
 }

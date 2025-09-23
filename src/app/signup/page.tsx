@@ -1,40 +1,55 @@
-// src/app/api/signup/route.ts
-import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb"; // your existing mongodb helper
-import { randomUUID } from "crypto";
+// src/app/signup/page.tsx
+import type { Metadata } from "next";
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json().catch(() => ({}));
-    // body may contain email/name if you want
-    const email = (body?.email || `user+free@local.dev`).toString().toLowerCase();
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://pricestory.vercel.app";
 
-    const client = await clientPromise;
-    const db = client.db();
+export const metadata: Metadata = {
+  title: "Signup • PriceStory",
+  description: "Create a PriceStory account to start tracking prices and get alerts.",
+  openGraph: {
+    title: "Signup • PriceStory",
+    description: "Create a PriceStory account to start tracking prices and get alerts.",
+    url: `${SITE}/signup`,
+    siteName: "PriceStory",
+    images: [{ url: `${SITE}/og-default.png`, width: 1200, height: 630 }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Signup • PriceStory",
+    description: "Create a PriceStory account to start tracking prices and get alerts.",
+  },
+  alternates: {
+    canonical: `${SITE}/signup`,
+  },
+};
 
-    const now = new Date();
+export default function SignupPage() {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "RegisterAction",
+    "target": `${SITE}/signup`,
+    "description": "Register at PriceStory to receive price drop notifications.",
+  };
 
-    // Upsert a simple user document for 'free' signup (adjust schema for your app)
-    const result = await db.collection("users").updateOne(
-      { email },
-      {
-        $setOnInsert: {
-          id: `usr_${Date.now()}`,
-          email,
-          plan: "free",
-          createdAt: now,
-        },
-        $set: {
-          lastSeen: now,
-        },
-      },
-      { upsert: true }
-    );
+  return (
+    <main className="max-w-3xl mx-auto px-4 py-12">
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      <h1 className="text-3xl font-bold mb-6">Create your PriceStory account</h1>
+      <p className="text-slate-600 mb-4">Sign up to track prices and receive smart alerts.</p>
 
-    // return something the client can use (safe)
-    return NextResponse.json({ ok: true, message: "Free account created", userId: result.upsertedId ?? null });
-  } catch (err) {
-    console.error("signup/free error", err);
-    return NextResponse.json({ ok: false, error: "Internal server error" }, { status: 500 });
-  }
+      {/* Preserve your existing signup UI here. If you have a client component, import it:
+          import SignupForm from "@/components/SignupForm";
+          and then render <SignupForm />
+          For now a minimal CTA is provided so the page builds without errors.
+      */}
+      <div className="bg-white rounded-lg p-6 shadow-sm">
+        <p className="text-slate-700">Signup form goes here — keep your existing client form component.</p>
+      </div>
+    </main>
+  );
 }

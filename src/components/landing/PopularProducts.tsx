@@ -1,3 +1,4 @@
+// src/components/landing/PopularProducts.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -20,6 +21,9 @@ type Product = {
 type Props = {
   onWatch?: (id: string) => Promise<void> | void;
   initialVisibleCount?: number;
+  // Added props to match usage in pages (backwards-compatible)
+  initialCount?: number;
+  forceShowAll?: boolean;
 };
 
 const CHUNK = 10;
@@ -54,8 +58,11 @@ function formatINR(v?: number | string | null): string {
   if (typeof v === "object") {
     try {
       if ((v as any).p != null) return formatINR((v as any).p);
-      if (Array.isArray(v) && v.length > 0)
-        return formatINR((v as any)[v.length - 1]);
+
+      if (Array.isArray(v)) {
+        const arr = v as any[];
+        if (arr.length > 0) return formatINR(arr[arr.length - 1]);
+      }
     } catch {
       return "—";
     }
@@ -142,15 +149,22 @@ const IMAGE_PLACEHOLDER =
 export default function PopularProducts({
   onWatch,
   initialVisibleCount = 3,
+  initialCount = 12,
+  forceShowAll = false,
 }: Props) {
   const [products, setProducts] = useState<Product[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(forceShowAll); // start with prop
   const [hasMore, setHasMore] = useState(false);
   const [watchingIds, setWatchingIds] = useState<Record<string, boolean>>({});
+
+  // Keep showAll in sync if parent toggles forceShowAll
+  useEffect(() => {
+    if (forceShowAll) setShowAll(true);
+  }, [forceShowAll]);
 
   async function fetchChunk(pageNumber: number) {
     const res = await fetch(
@@ -282,10 +296,11 @@ export default function PopularProducts({
     img.onerror = null;
   }
 
-  // Compute visible slice when not "show all"
+  // Show count honors initialCount prop (if provided), falling back to initialVisibleCount
   const visibleCount = showAll
     ? products.length
-    : Math.min(initialVisibleCount, products.length);
+    : Math.min(initialCount ?? initialVisibleCount, products.length);
+
   const visibleProducts = products.slice(0, visibleCount);
 
   return (
@@ -309,10 +324,9 @@ export default function PopularProducts({
           >
             {showAll
               ? "Show less"
-              : `View all (${Math.min(
-                  products.length,
-                  SHOW_MORE_TARGET
-                )}${hasMore ? "+" : ""})`}
+              : `View all (${Math.min(products.length, SHOW_MORE_TARGET)}${
+                  hasMore ? "+" : ""
+                })`}
           </button>
         </div>
       </div>
@@ -450,9 +464,7 @@ export default function PopularProducts({
                       }`}
                       aria-pressed={!!watchingIds[p.id]}
                       aria-label={
-                        watchingIds[p.id]
-                          ? `Watching ${title}`
-                          : `Watch ${title}`
+                        watchingIds[p.id] ? `Watching ${title}` : `Watch ${title}`
                       }
                       disabled={!!watchingIds[p.id]}
                     >
@@ -484,4 +496,3 @@ export default function PopularProducts({
     </section>
   );
 }
- 

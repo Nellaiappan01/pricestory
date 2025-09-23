@@ -1,4 +1,6 @@
 // src/app/api/image-proxy/route.js
+export const dynamic = "force-dynamic"; // ⬅️ tell Next.js this route is runtime only
+
 import { NextResponse } from "next/server";
 
 export async function GET(req) {
@@ -9,7 +11,7 @@ export async function GET(req) {
       return NextResponse.json({ ok: false, error: "Missing url" }, { status: 400 });
     }
 
-    // optional: allowlist hosts (uncomment and adjust if you want)
+    // optional: allowlist hosts (for security)
     // const allowed = ["rukmini1.flixcart.com", "rukminim1.flixcart.com", "i.ebayimg.com"];
     // const hostname = new URL(target).hostname;
     // if (!allowed.some(a => hostname.endsWith(a))) {
@@ -25,12 +27,12 @@ export async function GET(req) {
     const contentType = res.headers.get("content-type") || "image/jpeg";
     const headers = { "Content-Type": contentType, "Cache-Control": "public, max-age=86400" };
 
-    // Node runtime (Buffer available) -> return Buffer
+    // ✅ Buffer for Node runtime
     if (typeof Buffer !== "undefined") {
       return new NextResponse(Buffer.from(arrayBuffer), { headers });
     }
 
-    // Edge-ish runtime fallback -> return ArrayBuffer directly
+    // ✅ Fallback for edge runtime
     return new NextResponse(arrayBuffer, { headers });
   } catch (err) {
     console.error("image-proxy error:", err);
